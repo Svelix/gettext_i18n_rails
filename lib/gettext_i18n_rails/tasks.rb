@@ -23,7 +23,7 @@ namespace :gettext do
         files_to_translate,
         "version 0.0.1",
         :po_root => locale_path,
-        :msgmerge=>['--sort-output']
+        :msgmerge => config[:msgmerge_options]
       )
     else #we are on a version < 2.0
       puts "install new GetText with gettext:install to gain more features..."
@@ -116,5 +116,27 @@ namespace :gettext do
 
   def files_to_translate
     Dir.glob("{app,lib,config,#{locale_path}}/**/*.{rb,erb,haml}")
+  end
+
+  def config
+    @config ||= load_config
+  end
+
+  def load_config
+    if File.exists?(config_file)
+      config_defaults.merge(YAML.load_file(config_file).symbolize_keys)
+    else
+      config_defaults
+    end
+  end
+
+  def config_file
+    File.join(RAILS_ROOT, "config","gettext_i18n_rails.yml")
+  end
+
+  def config_defaults
+    {
+      :msgmerge_options => ['--sort-output']
+    }
   end
 end
